@@ -40,7 +40,7 @@ Calls itself recursively until n reaches 1.
 
 Time Complexity: O(n) (Recursive depth)
 
-💱 Problem 2: Currency Swap Form
+Problem 2: Currency Swap Form
 
 A user-friendly currency exchange form allowing users to swap assets between different currencies.
 
@@ -82,8 +82,7 @@ Vite - For fast builds
 Tailwind CSS - For modern styling
 
 Axios - For fetching API data
+![image](https://github.com/user-attachments/assets/ea02dcd9-62f5-4e2b-82ca-d402417b2a91)
 
-📩 Contact
 
-If you have any questions, feel free to reach out:📧 Email: nguyengiahy@example.com
 
