@@ -1,0 +1,105 @@
+ 
+ Issues and Computational Inefficiencies in the Code
+ in sortedBalences filter condition is incorrect
+
+		  if (lhsPriority > -99) {
+		     if (balance.amount <= 0) {
+ 		       return true;
+		     }
+		  }
+
+--> this lhsPriority is undefined in this scope ,balance.amount cannot be <==0
+--> this condition is incorrect as it will return true for all balances with amount <= 0
+fix
+ correct lhsPriority to balancePriority 
+ ensure that only balances with positive amount are kept
+
+ 2.useMemo sorting inefficiencies
+sort and filter operations are done in separate steps
+--->which leads to unnecessary iterations  
+fix 
+- combine sorting and filtering in a single operation
+
+3.Prices is included in the  useMemo dependence array not used inside the Computation
+--> remove Prices from the useMeo dependence array 
+
+4.error when balance.currency might be undefined which lead results ==Nan
+  const usdValue = prices[balance.currency] * balance.amount;
+  fix (prices[balance.currency]??0 )* balance.amount
+
+5.
+const getPriority = (blockchain: any)
+-> this function with parameter type is any of this
+ shouldn't be ,it can be replaced with enum or string instead
+fix const getPriority = (blockchain: string)
+
+Refactored Code
+
+interface WalletBalance {
+  currency: string;
+  amount: number;
+}
+interface FormattedWalletBalance {
+  currency: string;
+  amount: number;
+  formatted: string;
+}
+
+interface Props extends BoxProps {
+
+}
+const WalletPage: React.FC<Props> = (props: Props) => {
+  const { children, ...rest } = props;
+  const balances = useWalletBalances();
+  const prices = usePrices();
+
+//fix here
+ change parameter of blockchain from any type  to String  
+
+	const getPriority = (blockchain: string): number => {
+	  switch (blockchain) {
+	    case 'Osmosis':
+	      return 100
+	    case 'Ethereum':
+	      return 50
+	    case 'Arbitrum':
+	      return 30
+	    case 'Zilliqa':
+	      return 20
+	    case 'Neo':
+	      return 20
+	    default:
+	      return -99
+	  }
+	}
+
+	fix here
+  --> optimized filtering and sorting in a single operation
+  --> remove prices from the useMemo dependence array 
+ const sortedBalances = useMemo(() => {
+    return balances
+      .filter((balance) => getPriority(balance.blockchain) > -99 && balance.amount > 0)
+      .sort((a, b) => getPriority(b.blockchain) - getPriority(a.blockchain));
+  }, [balances]);
+
+ 
+  fix here 
+-->balance.currency can be ===undefined
+-->if balance.currency  ===undefined ,we will make it equal to 0
+   const rows = sortedBalances.map((balance, index) => {
+    const usdValue = (prices[balance.currency] ?? 0) * balance.amount;
+    return (
+      <WalletRow
+        key={index}
+        amount={balance.amount}
+        usdValue={usdValue}
+        formattedAmount={balance.amount.toFixed(2)}
+      />
+    );
+  });
+    return (
+    <div {...rest}>
+      {rows}
+    </div>
+  )
+}
